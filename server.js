@@ -2,6 +2,7 @@ const express = require('express');
 const sqlite3 = require('sqlite3');
 const cors = require('cors');
 const fs = require('fs');
+const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const {createEmployeeTable, createTimesheetTable, createMenuTable, createMenuItemTable} = require('./migration');
 
@@ -11,6 +12,7 @@ const PORT = process.env.PORT || 4000;
 const app = express();
 app.use(cors());
 app.use(morgan('dev'));
+app.use(bodyParser.json());
 
 // Router
 const router = require('./api/routes/index.js');
@@ -87,4 +89,6 @@ app.listen(PORT, err => {
         });
     }
 });
+
+module.exports = app;
 
