@@ -24,7 +24,7 @@ app.listen(PORT, err => {
     } else {
         db.serialize(() => {
 
-            // Drop the tables if they exist.
+            // // Drop the tables if they exist.
             db.run('DROP TABLE IF EXISTS Employee');
             db.run('DROP TABLE IF EXISTS Timesheet');
             db.run('DROP TABLE IF EXISTS Menu');

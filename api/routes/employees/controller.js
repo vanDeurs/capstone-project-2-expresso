@@ -1,20 +1,19 @@
 const express = require('express');
-const router = express.Router()
+const employeesRouter = express.Router()
 const sqlite3 = require('sqlite3');
 
 const db = new sqlite3.Database(process.env.TEST_DATABASE || './database.sqlite');
 
-router.get('/', (req, res, next) => {
-    // const employees = req.body.employees;
-    db.all(`SELECT * FROM Employee WHERE is_current_employee = 1`, (err, rows) => {
+employeesRouter.get('/', (req, res, next) => {
+    db.all('SELECT * FROM Employee WHERE is_current_employee = 1',
+      (err, employees) => {
         if (err) {
-            console.log('Error retriving employees.');
+            console.log('Error while retriving employees.');
             console.log('Error: ', err);
-            // next(err);
             return;
         }
-        res.status(200).send({employees: rows});
-    });
-});
+        res.status(200).send({employees: employees});
+      });
+  });
 
-module.exports = router;
+module.exports = employeesRouter;
