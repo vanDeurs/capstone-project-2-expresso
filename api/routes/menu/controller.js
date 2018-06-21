@@ -61,7 +61,9 @@ menusRouter.post('/', (req, res, next) => {
 // PUT Menu 
 menusRouter.put('/:menuId', (req, res, next) => {
     db.run(`UPDATE Menu 
-            SET title = $title`, 
+            SET title = $title
+            WHERE id = ${req.params.menuId}
+            `, 
         {
             $title: req.body.menu.title
         }, function(err){
@@ -75,7 +77,7 @@ menusRouter.put('/:menuId', (req, res, next) => {
             (err, updatedMenu) => {
                 if (err) {
                     console.log('Couldnt access employee.');
-                    console.log('Error: ', err);
+                    console.log('Error: ', err.message);
                     res.sendStatus(400);
                     return;
                 }
