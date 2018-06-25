@@ -50,7 +50,7 @@ timesheetRouter.post('/', (req, res, next) => {
                 console.log('Error: ', err);
                 return;
             }
-            db.get(`SELECT * FROM Timesheet WHERE Timesheet.employee_id = ${req.params.employeeId}`, 
+            db.get(`SELECT * FROM Timesheet WHERE Timesheet.id = ${this.lastID}`, 
             (err, newTimesheet) => {
                 if (err) {
                     console.error('Couldnt access added timesheet.');
@@ -64,74 +64,52 @@ timesheetRouter.post('/', (req, res, next) => {
     )
 });
 
-// timesheetRouter.post('/', (req, res, next) => {
-//     const employeeId = req.body.timesheet.employee_id,
-//           hours = req.body.timesheet.hours,
-//           rate = req.body.timesheet.rate,
-//           date = req.body.timesheet.date
-//     const employeeSql = 'SELECT * FROM Employee WHERE Employee.id = $employeeId';
-//     const employeeValues = {$employeeId: req.body.timesheet.employee_id};
-//     db.get(employeeSql, employeeValues, (error, employee) => {
-//       if (error) {
-//         next(error);
-//       } else {
-//         if (!hours || !rate || !date || !employeeId) {
-//           return res.sendStatus(400);
-//         }
-  
-//         const sql = 'INSERT INTO Timesheet (hours, rate, date, employee_id)' +
-//             'VALUES ($hours, $issueNumber, $rate, $employeeId,)';
-//         const values = {
-//             $employeeId: req.body.timesheet.employee_id,
-//             $hours: req.body.timesheet.hours,
-//             $rate: req.body.timesheet.rate,
-//             $date: req.body.timesheet.date
-//         };
-  
-//         db.run(sql, values, function(error) {
-//           if (error) {
-//             next(error);
-//           } else {
-//             db.get(`SELECT * FROM Timesheet WHERE Timesheet.id = ${this.lastID}`,
-//               (error, timesheet) => {
-//                 res.status(201).json({timesheet: timesheet});
-//               });
-//           }
-//         });
-//       }
-//     });
-//   });
+timesheetRouter.put('/:timesheetId', (req, res, next) => {
+    db.run(`UPDATE Timesheet
+            SET hours = $hours,
+                rate = $rate,
+                date = $date,
+                employee_id = $employeeId
+            WHERE id = ${req.params.timesheetId}
+            `, 
+            {
+                $hours: req.body.timesheet.hours,
+                $rate: req.body.timesheet.rate,
+                $date: req.body.timesheet.date,
+                $employeeId: req.params.employeeId
+            }, function(err) {
+                if (err) {
+                    console.log('Couldnt update timesheet.');
+                    console.log('Error: ', err);
+                    res.sendStatus(400);
+                    return;
+                }
+                db.get(`SELECT * FROM Timesheet WHERE Timesheet.id = ${req.params.timesheetId}`, 
+                (err, updatedTimesheet) => {
+                    if (err) {
+                        console.error('Couldnt access updated timesheet');
+                        console.log('Error: ', err);
+                        return res.sendStatus(404);
+                      }
+                      console.log(`A timesheet has been edited:  ${JSON.stringify(updatedTimesheet)}`);
+                      res.status(200).send({timesheet: updatedTimesheet});
+                });
+            });
+});
 
-// timesheetRouter.post('/', (req, res, next) => {
-//    db.run(`INSERT INTO Timesheet (employee_id, hours, rate, date) VALUES ($employeeId, $hours, $rate, $date)`, 
-//    {
-//        // Look at the timesheet table and insert the correct values
-//        // Google error: Error:  { Error: SQLITE_CONSTRAINT: NOT NULL constraint failed: Timesheet.employee_id errno: 19, code: 'SQLITE_CONSTRAINT' }
-//        $employeeId: req.body.timesheet.employeeId,
-//        $hours: req.body.timesheet.hours,
-//        $rate: req.body.timesheet.rate,
-//        $date: req.body.timesheet.date
-//    }, function(err){
-//        if (err) {
-//             res.sendStatus(400);
-//             console.log('Error while creating timesheet.');
-//             console.log('Error: ', err);
-//             return;
-//         }
-//         db.get(`SELECT * FROM Timesheet WHERE Timesheet.id = ${this.lastID}`, 
-//         (err, newTimesheet) => {
-//             if (err) {
-//                 console.error('Couldnt access added timesheet.');
-//                 console.log('Error: ', err);
-//                 return res.sendStatus(500);
-//             }
-//             console.log(`A row has been inserted with row ${JSON.stringify(newTimesheet)}`);
-//             res.status(201).send({timesheet: newTimesheet});
-//         });
-//    });
-// });
-
-
+timesheetRouter.delete('/:timesheetId', (req, res, next) => {
+    db.run(`DELETE FROM Timesheet WHERE Timesheet.id = ${req.params.timesheetId}`, 
+    (err, timesheet) => {
+        if (err) {
+            console.log('Couldnt delete timesheet.');
+            console.log('Error: ', err);
+            res.sendStatus(400);
+            return;
+        }
+        console.log('Deleted timesheet.');
+        return res.sendStatus(204);
+    });
+});
 
 
 
